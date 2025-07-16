@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"passwords/account"
-	"passwords/files"
 
 	"github.com/fatih/color"
 )
@@ -57,12 +56,8 @@ func createAccount() {
 			color.Red("Error! Invalid URL format")
 		}
 	}
-	file, err := myAccount.ToBytes()
-	if err != nil {
-		fmt.Println("Error! Failed to convert to JSON")
-		return
-	}
-	files.WriteFile(file, "data.json")
+	vault := account.NewVault()
+	vault.AddAccount(*myAccount)
 }
 
 func findAccount() {

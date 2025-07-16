@@ -1,19 +1,18 @@
 package files
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/fatih/color"
 )
 
-func ReadFile() {
-	data, err := os.ReadFile("file.txt")
+func ReadFile(name string) ([]byte, error) {
+	data, err := os.ReadFile(name)
 	if err != nil {
 		color.Red("Error!")
-		return
+		return nil, err
 	}
-	fmt.Println(string(data))
+	return data, nil
 }
 
 func WriteFile(content []byte, name string) {
