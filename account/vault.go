@@ -3,6 +3,7 @@ package account
 import (
 	"encoding/json"
 	"passwords/files"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -23,12 +24,34 @@ func (vault *Vault) ToBytes() ([]byte, error) {
 
 func (vault *Vault) AddAccount(acc Account) {
 	vault.Accounts = append(vault.Accounts, acc)
-	vault.UpdatedAt = time.Now()
-	data, err := vault.ToBytes()
-	if err != nil {
-		color.Red("Не удалось преобразовать")
+	vault.save()
+}
+
+func (vault *Vault) FindAccount(url string) []Account {
+	var accounts []Account
+	for _, account := range vault.Accounts {
+		isMatched := strings.Contains(account.Url, url)
+		if isMatched {
+			accounts = append(accounts, account)
+		}
 	}
-	files.WriteFile(data, "data.json")
+	return accounts
+}
+
+func (vault *Vault) DeleteAccount(url string) bool {
+	var accounts []Account
+	isDeleted := false
+	for _, account := range vault.Accounts {
+		isMatched := strings.Contains(account.Url, url)
+		if !isMatched {
+			accounts = append(accounts, account)
+			continue
+		}
+		isDeleted = true
+	}
+	vault.Accounts = accounts
+	vault.save()
+	return isDeleted
 }
 
 func NewVault() *Vault {
@@ -42,11 +65,20 @@ func NewVault() *Vault {
 	var vault Vault
 	err = json.Unmarshal(file, &vault)
 	if err != nil {
-		color.Red("Ошибка! Не удалось разобрать файл data.json")
+		color.Red("Error! Failed to parse file data.json")
 		return &Vault{
 			Accounts:  []Account{},
 			UpdatedAt: time.Now(),
 		}
 	}
 	return &vault
+}
+
+func (vault *Vault) save() {
+	vault.UpdatedAt = time.Now()
+	data, err := vault.ToBytes()
+	if err != nil {
+		color.Red("Error! Failed to convert")
+	}
+	files.WriteFile(data, "data.json")
 }

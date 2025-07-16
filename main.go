@@ -9,17 +9,18 @@ import (
 
 func main() {
 	fmt.Println("*** Password manager app ***")
+	vault := account.NewVault()
 
 Menu:
 	for {
 		userChoice := getMenu()
 		switch userChoice {
 		case 1:
-			createAccount()
+			createAccount(vault)
 		case 2:
-			findAccount()
+			findAccount(vault)
 		case 3:
-			deleteAccount()
+			deleteAccount(vault)
 		case 4:
 			break Menu
 		}
@@ -44,7 +45,7 @@ func getMenu() int {
 	return userChoice
 }
 
-func createAccount() {
+func createAccount(vault *account.Vault) {
 	login := promptData("Enter your login")
 	password := promptData("Enter your password")
 	url := promptData("Enter URL")
@@ -56,14 +57,26 @@ func createAccount() {
 			color.Red("Error! Invalid URL format")
 		}
 	}
-	vault := account.NewVault()
 	vault.AddAccount(*myAccount)
 }
 
-func findAccount() {
-
+func findAccount(vault *account.Vault) {
+	url := promptData("Enter URL to search for account")
+	accounts := vault.FindAccount(url)
+	if len(accounts) == 0 {
+		color.Red("No accounts found")
+	}
+	for _, account := range accounts {
+		account.OutputData()
+	}
 }
 
-func deleteAccount() {
-
+func deleteAccount(vault *account.Vault) {
+	url := promptData("Enter the URL to delete your account")
+	isDeleted := vault.DeleteAccount(url)
+	if isDeleted {
+		color.Green("Account deleted")
+	} else {
+		color.Red("Account not found")
+	}
 }
