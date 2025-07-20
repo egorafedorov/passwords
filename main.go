@@ -14,42 +14,43 @@ func main() {
 
 Menu:
 	for {
-		userChoice := getMenu()
-		switch userChoice {
-		case 1:
+		vars := promptData([]string{
+			"1. Create an account",
+			"2. Find an account",
+			"3. Delete account",
+			"4. Exit",
+			"Select the menu item",
+		})
+		switch vars {
+		case "1":
 			createAccount(vault)
-		case 2:
+		case "2":
 			findAccount(vault)
-		case 3:
+		case "3":
 			deleteAccount(vault)
-		case 4:
+		case "4":
 			break Menu
 		}
 	}
 }
 
-func promptData(prompt string) string {
-	fmt.Print(prompt + ": ")
+func promptData[T any](prompt []T) string {
+	for i, line := range prompt {
+		if i == len(prompt)-1 {
+			fmt.Printf("%v: ", line)
+		} else {
+			fmt.Println(line)
+		}
+	}
 	var res string
 	fmt.Scanln(&res)
 	return res
 }
 
-func getMenu() int {
-	var userChoice int
-	fmt.Println("1. Create an account")
-	fmt.Println("2. Find an account")
-	fmt.Println("3. Delete account")
-	fmt.Println("4. Exit")
-	fmt.Print("Select the menu item: ")
-	fmt.Scanln(&userChoice)
-	return userChoice
-}
-
 func createAccount(vault *account.VaultWithDb) {
-	login := promptData("Enter your login")
-	password := promptData("Enter your password")
-	url := promptData("Enter URL")
+	login := promptData([]string{"Enter your login"})
+	password := promptData([]string{"Enter your password"})
+	url := promptData([]string{"Enter URL"})
 	myAccount, err := account.NewAccount(login, password, url)
 	if err != nil {
 		if err.Error() == "INVALID_LOGIN" {
@@ -62,7 +63,7 @@ func createAccount(vault *account.VaultWithDb) {
 }
 
 func findAccount(vault *account.VaultWithDb) {
-	url := promptData("Enter URL to search for account")
+	url := promptData([]string{"Enter URL to search for account"})
 	accounts := vault.FindAccount(url)
 	if len(accounts) == 0 {
 		color.Red("No accounts found")
@@ -73,7 +74,7 @@ func findAccount(vault *account.VaultWithDb) {
 }
 
 func deleteAccount(vault *account.VaultWithDb) {
-	url := promptData("Enter the URL to delete your account")
+	url := promptData([]string{"Enter the URL to delete your account"})
 	isDeleted := vault.DeleteAccount(url)
 	if isDeleted {
 		color.Green("Account deleted")
